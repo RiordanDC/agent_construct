@@ -1,0 +1,18 @@
+todo: rio
+
+- build main.hpp and main.cpp
+- build makefile
+- connect asset loaders
+- create asset loader class to group loaders for in engine object creation
+- connect physics engine
+- create physics objects class
+- camera motion
+
+> future dependents
+
+- assimp(mesh loader)
+- bullet (physics engine)
+- glad (opengl function loader)
+- std (texture loader)
+- glfw (window/input control)
+- glm (linear algebra)
