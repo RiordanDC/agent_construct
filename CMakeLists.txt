@@ -34,15 +34,17 @@ include_directories(Beon/headers/
                     Beon/libs/glad/include/
                     Beon/libs/glfw/include/
                     Beon/libs/glm/
-                    Beon/libs/stb/)
+                    Beon/libs/stb/
+                    Beon/include
+                    Beon/shaders)
 
 file(GLOB libsS_SOURCES Beon/libs/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Beon/headers/*.hpp)
 file(GLOB PROJECT_SOURCES Beon/src/*.cpp)
-file(GLOB PROJECT_SHADERS Beon/Shaders/*.comp
-                          Beon/Shaders/*.frag
-                          Beon/Shaders/*.geom
-                          Beon/Shaders/*.vert)
+file(GLOB PROJECT_SHADERS Beon/shaders/*.comp
+                          Beon/shaders/*.frag
+                          Beon/shaders/*.geom
+                          Beon/shaders/*.vert)
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
                          .gitattributes
@@ -50,9 +52,11 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
                          .gitmodules)
 
 source_group("headers" FILES ${PROJECT_HEADERS})
-source_group("Shaders" FILES ${PROJECT_SHADERS})
-source_group("Sources" FILES ${PROJECT_SOURCES})
-source_group("libss" FILES ${libsS_SOURCES})
+source_group("shaders" FILES ${PROJECT_SHADERS})
+source_group("src" FILES ${PROJECT_SOURCES})
+source_group("libs" FILES ${libsS_SOURCES})
+
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/Beon/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Beon)
 
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
