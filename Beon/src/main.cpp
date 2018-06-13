@@ -3,8 +3,6 @@
 #include "shader_improved.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
-#include "controls.hpp"
-#include "objloader.hpp"
 
 // C++ Standard Headers
 #include <cstdio>
@@ -19,12 +17,10 @@
 #include <vector>
 //Window name
 std::string programName = "Beon Engine";
+//Render loop conditional
 static bool running = true;
 
-//Init camera object
-//Warning: When controls are active the mouse will be locked to the center of the screen.
-//Controls *controls = new Controls(glm::vec3(0,0,5), 3.14f, 0.0f, 0.005, 0.5, 70.0f);
-
+//Define functions
 void cleanup();
 bool Init();
 void Run();
@@ -60,17 +56,19 @@ int main()
         glfwTerminate();
         return -1;
     }
+    //Set current window context
     glfwMakeContextCurrent(window);
+    //Whenever the window is resized, mouse moved or scolled, the respective function is called.
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
-
+    //Load OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "[x] Failed to initialize GLAD\n" << std::endl;
         return -1;
     }
-
+    //Load glad
     gladLoadGL();
     fprintf(stderr, "[-] OpenGL %s\n", glGetString(GL_VERSION));
 
@@ -98,11 +96,8 @@ int main()
 
 
     // Create and compile our GLSL program from the shaders
-    //GLuint programID = LoadShaders("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
     Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
     // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    
     float vertices2[] = {
          0.5f,  0.5f, 0.0f,  // top right
          0.5f, -0.5f, 0.0f,  // bottom right
