@@ -1,7 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <glad/glad.h> 
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -28,7 +28,7 @@ class Model
 {
 public:
     /*  Model Data */
-    vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    vector<Texture> textures_loaded;    // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     vector<Mesh> meshes;
     string directory;
     bool gammaCorrection;
@@ -44,7 +44,9 @@ public:
     void Draw(Shader shader)
     {
         for(unsigned int i = 0; i < meshes.size(); i++)
+        {
             meshes[i].Draw(shader);
+        }
     }
     
 private:
@@ -54,7 +56,7 @@ private:
     {
         // read file via ASSIMP
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenNormals);
         // check for errors
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
@@ -64,6 +66,7 @@ private:
         // retrieve the directory path of the filepath
         directory = path.substr(0, path.find_last_of('/'));
 
+        printf("[%s] Model Loading...\n", path.c_str());
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
     }
@@ -84,7 +87,6 @@ private:
         {
             processNode(node->mChildren[i], scene);
         }
-
     }
 
     Mesh processMesh(aiMesh *mesh, const aiScene *scene)
@@ -99,18 +101,26 @@ private:
         {
             Vertex vertex;
             glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
-            // positions
-            vector.x = mesh->mVertices[i].x;
-            vector.y = mesh->mVertices[i].y;
-            vector.z = mesh->mVertices[i].z;
-            vertex.Position = vector;
-            // normals
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
-            vertex.Normal = vector;
+            
+            if(mesh->mNumVertices > 0)
+            {
+                // positions
+                vector.x = mesh->mVertices[i].x;
+                vector.y = mesh->mVertices[i].y;
+                vector.z = mesh->mVertices[i].z;
+                vertex.Position = vector;
+                // normals
+                if(mesh->HasNormals())
+                {
+                    vector.x = mesh->mNormals[i].x;
+                    vector.y = mesh->mNormals[i].y;
+                    vector.z = mesh->mNormals[i].z;
+                    vertex.Normal = vector;
+                }
+            }
+
             // texture coordinates
-            if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+            if(mesh->HasTextureCoords(i)) // does the mesh contain texture coordinates?
             {
                 glm::vec2 vec;
                 // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
@@ -121,17 +131,20 @@ private:
             }
             else
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-            // tangent
-            vector.x = mesh->mTangents[i].x;
-            vector.y = mesh->mTangents[i].y;
-            vector.z = mesh->mTangents[i].z;
-            vertex.Tangent = vector;
-            // bitangent
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
-            vertex.Bitangent = vector;
-            vertices.push_back(vertex);
+            if(mesh->HasTangentsAndBitangents())
+            {
+                // tangent
+                vector.x = mesh->mTangents[i].x;
+                vector.y = mesh->mTangents[i].y;
+                vector.z = mesh->mTangents[i].z;
+                vertex.Tangent = vector;
+                // bitangent
+                vector.x = mesh->mBitangents[i].x;
+                vector.y = mesh->mBitangents[i].y;
+                vector.z = mesh->mBitangents[i].z;
+                vertex.Bitangent = vector;
+                vertices.push_back(vertex);
+            }
         }
         // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
         for(unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -162,7 +175,7 @@ private:
         // 4. height maps
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-        
+
         // return a mesh object created from the extracted mesh data
         return Mesh(vertices, indices, textures);
     }

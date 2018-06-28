@@ -3,6 +3,7 @@
 #include "shader_improved.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+#include "model.hpp"
 
 // C++ Standard Headers
 #include <cstdio>
@@ -25,24 +26,23 @@ void cleanup();
 bool Init();
 void Run();
 
+void InitController(GLFWwindow* window, int screenWidth, int screenHeight);
+void updateController(GLFWwindow* window, float deltaTime);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, float deltaTime);
 
-// settings
-const unsigned int SCR_WIDTH = mWidth;
-const unsigned int SCR_HEIGHT = mHeight;
-
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
+unsigned int SCR_WIDTH;
+unsigned int SCR_HEIGHT;
+float lastX;
+float lastY;
 bool firstMouse = true;
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
-float lastFrame = 0.0f;
+float lastTime = 0.0f;
 
 
 int main()
@@ -50,6 +50,7 @@ int main()
     Init();
     // Open a window and create its OpenGL context
     window = glfwCreateWindow(mWidth, mHeight, programName.c_str(), NULL, NULL);
+
     if (window == NULL)
     {
         std::cout << "[x] Failed to create GLFW window\n" << std::endl;
@@ -59,9 +60,10 @@ int main()
     //Set current window context
     glfwMakeContextCurrent(window);
     //Whenever the window is resized, mouse moved or scolled, the respective function is called.
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    //glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    //glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetScrollCallback(window, scroll_callback);
+    InitController(window, mWidth, mHeight);
     //Load OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -71,7 +73,6 @@ int main()
     //Load glad
     gladLoadGL();
     fprintf(stderr, "[-] OpenGL %s\n", glGetString(GL_VERSION));
-
 
     
     // Ensure we can capture the escape key being pressed below
@@ -114,6 +115,7 @@ int main()
         1, 2, 3,  // second Triangle
         4, 5, 7,
         5, 6, 7
+
     };
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -140,41 +142,47 @@ int main()
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0); 
+
+    Model ourModel("/Users/riordan/Documents/projects/programs/beon/Beon/include/models/nanosuit/nanosuit.obj");
+
     
 
     // uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    double lastTime = glfwGetTime();
+    //Frames per second counter
+    double lastFrame = glfwGetTime();
     int nbFrames = 0;
-
+    double printTimer = 4; //Print FPS every 4 seconds
 
     // Game Loop 
     while (glfwWindowShouldClose(window) == false && running) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
+
         double currentTime = glfwGetTime();
         nbFrames++;
-        if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
+        // per-frame time logic
+        deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
+        if ((currentTime - lastFrame) >= printTimer ){
             // printf and reset timer
-            //printf("%f ms/frame\n", 1000.0/double(nbFrames));
+            printf("%f ms/frame\n", (printTimer*1000.0)/double(nbFrames));
             nbFrames = 0;
-            lastTime += 1.0;
+            lastFrame += printTimer;
         }
 
-        // per-frame time logic
-        // --------------------
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
 
+        
 
-
-
+        /*
         // input
         processInput(window);
+        */
+        updateController(window, deltaTime);
 
-        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // draw our first triangle
@@ -188,14 +196,20 @@ int main()
         // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
         mShader.setMat4("view", view);
-
+        
         //I think this needs to be passed for this to work. Check it out. 
         mShader.setMat4("model", glm::mat4(1.0));
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawArrays(GL_TRIANGLES, 0, 12);
         //glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-        // glBindVertexArray(0); // no need to unbind it every time 
- 
+        //glBindVertexArray(0); // no need to unbind it every time 
+        
+        glm::mat4 model;
+        model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f)); // it's a bit too big for our scene, so scale it down
+        mShader.setMat4("model", model);
+        ourModel.Draw(mShader);
+        
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -230,19 +244,20 @@ bool Init(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
-#endif
+//#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
+//#endif
     
 }
 
+void updateController(GLFWwindow* window, float deltaTime){
+    processInput(window, deltaTime);
+}
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, float deltaTime)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -257,7 +272,6 @@ void processInput(GLFWwindow *window)
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
@@ -267,7 +281,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -287,9 +300,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
 }
 
+void InitController(GLFWwindow* window, int screenWidth, int screenHeight){
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    SCR_WIDTH = screenWidth;
+    SCR_HEIGHT = screenHeight;
+    lastX = SCR_HEIGHT / 2.0f;
+    lastY = SCR_WIDTH / 2.0f;
+}
