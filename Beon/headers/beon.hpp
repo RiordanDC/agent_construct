@@ -33,4 +33,5 @@ using namespace glm;
 const int mWidth = 800;
 const int mHeight = 600;
 
+
 #endif //~ Beon Header

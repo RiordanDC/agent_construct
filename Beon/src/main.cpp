@@ -1,9 +1,8 @@
 // Local Headers
 #include "beon.hpp"
-#include "shader_improved.hpp"
+#include "shader.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
-#include "model.hpp"
 
 // C++ Standard Headers
 #include <cstdio>
@@ -99,23 +98,15 @@ int main()
     // Create and compile our GLSL program from the shaders
     Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
     // set up vertex data (and buffer(s)) and configure vertex attributes
-    float vertices2[] = {
+    float vertices[] = {
          0.5f,  0.5f, 0.0f,  // top right
          0.5f, -0.5f, 0.0f,  // bottom right
         -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f,  // top left 
-
-         1.5f,  1.5f, 1.0f,  // top right back
-         1.5f, -1.5f, 1.0f,  // bottom right back
-        -1.5f, -1.5f, 1.0f,  // bottom left back
-        -1.5f,  1.5f, 1.0f   // top left back
+        -0.5f,  0.5f, 0.0f   // top left 
     };
     unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3,  // second Triangle
-        4, 5, 7,
-        5, 6, 7
-
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
     };
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -125,7 +116,7 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -142,10 +133,6 @@ int main()
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0); 
-
-    Model ourModel("/Users/riordan/Documents/projects/programs/beon/Beon/include/models/nanosuit/nanosuit.obj");
-
-    
 
     // uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -200,16 +187,18 @@ int main()
         //I think this needs to be passed for this to work. Check it out. 
         mShader.setMat4("model", glm::mat4(1.0));
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, 12);
-        //glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //glBindVertexArray(0); // no need to unbind it every time 
         
+        /*
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f)); // it's a bit too big for our scene, so scale it down
         mShader.setMat4("model", model);
         ourModel.Draw(mShader);
-        
+        */
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -252,6 +241,10 @@ bool Init(){
     
 }
 
+
+/*
+INPUT CONTROLLER HELPER FUNCTIONS 
+*/
 void updateController(GLFWwindow* window, float deltaTime){
     processInput(window, deltaTime);
 }
@@ -315,3 +308,9 @@ void InitController(GLFWwindow* window, int screenWidth, int screenHeight){
     lastX = SCR_HEIGHT / 2.0f;
     lastY = SCR_WIDTH / 2.0f;
 }
+/*
+INPUT CONTROLLER HELPER FUNCTIONS END
+*/
+
+
+
