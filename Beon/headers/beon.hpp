@@ -1,4 +1,3 @@
-// Preprocessor Directives
 #ifndef BEON
 #define BEON
 #pragma once
@@ -6,9 +5,10 @@
 
 // GLAD Headers
 #include <glad/glad.h>
-// GLFW Headers
-#include <GLFW/glfw3.h>
-GLFWwindow* window;
+
+//Local WindowManager header
+#include "WindowManager.hpp"
+
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -29,9 +29,30 @@ using namespace glm;
 //     #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-// Define Some Constants
-const int mWidth = 800;
-const int mHeight = 600;
+
+// timing
+float deltaTime = 0.0f; // time between current frame and last frame
+float lastTime = 0.0f;
+
+//Frames per second counter
+double lastFrame = glfwGetTime();
+int nbFrames = 0;
+double printTimer = 4; //Print FPS every 4 seconds
 
 
-#endif //~ Beon Header
+void getDeltaTime(){
+    double currentTime = glfwGetTime();
+    nbFrames++;
+    // per-frame time logic
+    deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+
+    if ((currentTime - lastFrame) >= printTimer ){
+        // printf and reset timer
+        printf("%f ms/frame\n", (printTimer*1000.0)/double(nbFrames));
+        nbFrames = 0;
+        lastFrame += printTimer;
+    }
+}
+
+#endif
