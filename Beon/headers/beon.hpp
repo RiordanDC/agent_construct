@@ -9,7 +9,6 @@
 //Local WindowManager header
 #include "WindowManager.hpp"
 
-
 // Include GLM
 #include <glm/glm.hpp>
 using namespace glm;
@@ -29,6 +28,16 @@ using namespace glm;
 //     #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+// C++ Standard Headers
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <stdarg.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
 
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
@@ -53,6 +62,22 @@ void getDeltaTime(){
         nbFrames = 0;
         lastFrame += printTimer;
     }
+}
+
+// #define WINDOWS  /* uncomment this line to use it for windows.*/ 
+#ifdef WINDOWS
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
+ 
+std::string GetCurrentWorkingDir( void ) {
+  char buff[FILENAME_MAX];
+  GetCurrentDir( buff, FILENAME_MAX );
+  std::string current_working_dir(buff);
+  return current_working_dir;
 }
 
 #endif

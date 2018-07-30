@@ -16,7 +16,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void updateController(GLFWwindow* window, float deltaTime);
 void processInput(GLFWwindow *window, float deltaTime);
-		
+void updateCamera(Shader *shader);
+
+void updateCamera(Shader &shader)
+{
+    // pass projection matrix to shader (note that in this case it could change every frame)
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
+    shader.setMat4("projection", projection);
+
+    // camera/view transformation
+    glm::mat4 view = camera.GetViewMatrix();
+    shader.setMat4("view", view);
+}
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

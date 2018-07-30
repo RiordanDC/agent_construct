@@ -2,17 +2,8 @@
 #include "beon.hpp"
 #include "shader.hpp"
 #include "CameraController.hpp"
-
-// C++ Standard Headers
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <string>
-#include <stdarg.h>
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
+#include "model.hpp"
+#include "Plane.hpp"
 
 static bool running = true;
 
@@ -34,7 +25,11 @@ int main()
 
     Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
 
+    Model ourModel(GetCurrentWorkingDir()+"/cube.obj");
 
+    std::cout << GetCurrentWorkingDir()+"/cube.obj" << std::endl;;
+
+    /*
     float vertices[] = {
          0.5f,  0.5f, 0.0f,  // top right
          0.5f, -0.5f, 0.0f,  // bottom right
@@ -74,6 +69,14 @@ int main()
     // uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    */
+
+    Plane plane;
+    plane.Move(0, 0, 0);
+    plane.axis = glm::vec3(1.f,0.f,0.f);
+    plane.angle = 90;
+    float x = 0;
+    mShader.use();
 
     // Game Loop //
     while (glfwWindowShouldClose(window) == false && running) {
@@ -87,25 +90,30 @@ int main()
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mShader.use();
+        updateCamera(mShader);
 
-
-        // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
-        mShader.setMat4("projection", projection);
-
-        // camera/view transformation
-        glm::mat4 view = camera.GetViewMatrix();
-        mShader.setMat4("view", view);
-        
+        plane.Draw(mShader);
+        plane.Move(0,0,x);
+        //plane.angle += 0.5 * deltaTime;
+        x += 0.5 * deltaTime;
+        /*
         //I think this needs to be passed for this to work. Check it out. 
         mShader.setMat4("model", glm::mat4(1.0));
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //glBindVertexArray(0); // no need to unbind it every time 
+        */
         
 
+        /*
+        // render the loaded model
+        glm::mat4 model;
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        //model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f)); // it's a bit too big for our scene, so scale it down
+        mShader.setMat4("model", model);
+        ourModel.Draw(mShader);
+        */
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
