@@ -18,7 +18,7 @@ bool loadAssImp(
 	std::vector<glm::vec3> & normals
 );
 
-#endif
+//#endif
 
 #include <vector>
 #include <stdio.h>
@@ -131,7 +131,7 @@ bool loadOBJ(
 }
 
 
-#ifdef USE_ASSIMP // don't use this #define, it's only for me (it AssImp fails to compile on your machine, at least all the other tutorials still work)
+//#ifdef USE_ASSIMP // don't use this #define, it's only for me (it AssImp fails to compile on your machine, at least all the other tutorials still work)
 
 // Include AssImp
 #include <assimp/Importer.hpp>      // C++ importer interface
@@ -140,7 +140,7 @@ bool loadOBJ(
 
 bool loadAssImp(
 	const char * path, 
-	std::vector<unsigned short> & indices,
+	std::vector<unsigned short> & indices, //was unsigned short
 	std::vector<glm::vec3> & vertices,
 	std::vector<glm::vec2> & uvs,
 	std::vector<glm::vec3> & normals

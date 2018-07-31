@@ -6,8 +6,10 @@
 // GLAD Headers
 #include <glad/glad.h>
 
-//Local WindowManager header
+//Local 
 #include "WindowManager.hpp"
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 
 // Include GLM
 #include <glm/glm.hpp>
