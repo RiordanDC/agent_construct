@@ -47,7 +47,7 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float) * 3, &vertices[0], GL_STATIC_DRAW);
     */
     VertexBuffer vb(&vertices[0], vertices.size() * sizeof(float) * 3);
-
+    //IndexBuffer ib(&indices[0], indices.size());
     
     unsigned int vao;
     glGenVertexArrays(1, &vao);
@@ -55,7 +55,9 @@ int main()
     glEnableVertexAttribArray(0);
     //glBindBuffer(GL_ARRAY_BUFFER, vbo);
     vb.Bind();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+    //glBindVertexArray(0);
 
     std::cout << GetCurrentWorkingDir()+"/cube.obj" << std::endl;;
     

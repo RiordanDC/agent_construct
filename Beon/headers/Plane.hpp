@@ -56,7 +56,7 @@ void Plane::Draw(Shader &shader)
 
 	vb.Bind();
 	glDrawArrays(GL_TRIANGLES, 0, 4 * 3);
-	vb.Unbind();
+	glBindVertexArray(0);
 
 }
 
@@ -79,15 +79,9 @@ Plane::Plane(){
         1, 2, 3    // second triangle
     };
     
+
     vb.Build(&vertices[0], vertices.size() * sizeof(float) * 3);
 
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glEnableVertexAttribArray(1);
-    vb.Bind();
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3, NULL);
 
     /*
     //glGenVertexArrays(1, &VAO);
