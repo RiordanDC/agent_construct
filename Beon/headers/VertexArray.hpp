@@ -26,7 +26,7 @@ VertexArray::~VertexArray(){
 
 void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout){
 	Bind();
-	vb.Bind()
+	vb.Bind();
 	const auto& elements = layout.GetElements();
 	unsigned int offset = 0;
 	for(unsigned int i = 0; i < elements.size(); i++){
@@ -44,3 +44,4 @@ void VertexArray::Bind() const{
 void VertexArray::Unbind() const{
 	glBindVertexArray(0);
 }
+

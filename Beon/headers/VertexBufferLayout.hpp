@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include 
 
 
 struct VertexBufferElement{
@@ -32,30 +31,32 @@ public:
 	VertexBufferLayout()
 		: m_Stride(0) {}
 
-	template<typename T>
-	void Push(int count){
-		static_assert(false);
-	}
 
-	template<>
-	boid Push<float>(unsigned int count, bool normalized){
+	void Push_FLOAT(unsigned int count, bool normalized = false){
 
 		m_Elements.push_back({GL_FLOAT, count, GL_FALSE});
 		m_Stride += VertexBufferElement::GetSizeOfType(GL_FLOAT) * count;
 	}
 
-	template<>
-	boid Push<unsigned int>(unsigned int count){
+	void Push_INT(unsigned int count){
 		m_Elements.push_back({GL_UNSIGNED_INT, count, GL_FALSE});
 		m_Stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT) * count;
 	}
 
-	template<>
-	boid Push<unsigned char>(unsigned int count){
+	void Push_BYTE(unsigned int count){
 		m_Elements.push_back({GL_UNSIGNED_BYTE, count, GL_TRUE});
 		m_Stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_BYTE) * count;
 	}
 
-	inline const& std::vector<VertexBufferElement> GetElements() const {return m_Elements;}
-	inline unsigned int GetStride() const {return m_Stride;}
+	inline const std::vector<VertexBufferElement>& GetElements() const 
+	{
+		return m_Elements;
+	}
+
+	inline unsigned int GetStride() const 
+	{
+		return m_Stride;
+	}
+
 };
+

@@ -46,15 +46,18 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float) * 3, &vertices[0], GL_STATIC_DRAW);
     */
+
+    //VertexBufferElement layout();
+
+    VertexArray va;
     VertexBuffer vb(&vertices[0], vertices.size() * sizeof(float) * 3);
     //IndexBuffer ib(&indices[0], indices.size());
-    
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    vb.Bind();
+
+
+    VertexBufferLayout layout;
+    layout.Push_FLOAT(3);
+    va.AddBuffer(vb, layout);
+
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
     //glBindVertexArray(0);
@@ -85,10 +88,8 @@ int main()
         glm::mat4 model(1.0);
         mShader.setMat4("model", model);
 
-        //glBindVertexArray(vbo);
-        vb.Bind();
+        va.Bind();
         glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

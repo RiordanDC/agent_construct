@@ -9,6 +9,8 @@
 //Local 
 #include "WindowManager.hpp"
 #include "VertexBuffer.hpp"
+#include "VertexArray.hpp"
+#include "VertexBufferLayout.hpp"
 #include "IndexBuffer.hpp"
 
 // Include GLM
