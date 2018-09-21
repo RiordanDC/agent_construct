@@ -21,12 +21,21 @@ void updateCamera(Shader *shader);
 void updateCamera(Shader &shader)
 {
     // pass projection matrix to shader (note that in this case it could change every frame)
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
-    shader.setMat4("projection", projection);
+    glm::mat4 ProjectionMatrix = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
+    shader.setMat4("P", ProjectionMatrix);
 
     // camera/view transformation
-    glm::mat4 view = camera.GetViewMatrix();
-    shader.setMat4("view", view);
+    glm::mat4 ViewMatrix = camera.GetViewMatrix();
+    shader.setMat4("V", ViewMatrix);
+
+    //Model transform
+    //glm::mat4 ModelMatrix = glm::mat4(1.0);
+    //shader.setMat4("M", ModelMatrix);
+
+    //glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+    //shader.setMat4("MVP", MVP);
+
+    shader.setVec3("cameraPos", camera.Position);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
