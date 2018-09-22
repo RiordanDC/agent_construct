@@ -15,6 +15,15 @@ void render(const VertexBuffer& vb, const IndexBuffer& ib, Shader& shader);
 
 WindowManager* Manager = WindowManager::getInstance();
 
+/////TEST STRUCT//////
+struct VERT_NORM{
+    glm::vec3 vert;
+    glm::vec3 norm;
+    VERT_NORM(glm::vec3 v, glm::vec3 n){
+        vert = v;
+        norm = n;
+    }
+};
 int main()
 {
     if(Manager->initWindow("Beon", 800, 600) == -1){
@@ -43,39 +52,45 @@ int main()
 
     std::cout << vertices.size() << std::endl;
 
-    /*
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float) * 3, &vertices[0], GL_STATIC_DRAW);
-    */
-
-    //VertexBufferElement layout();
+    std::vector<VERT_NORM> data_test;
+    for(int i = 0; i<vertices.size(); i++)
+    {
+        VERT_NORM datum(vertices[i], normals[i]);
+        data_test.push_back(datum);
+    }
 
     VertexArray va;
-    VertexBuffer vb(&vertices[0],  vertices.size() * sizeof(glm::vec3));
-    /*
-    for(int i = 0; i < vertices.size(); i++){
-        vertices[i] = glm::vec3(vertices[i][0], vertices[i][1], -10.f);
-    }
-    */
+    VertexBuffer vb(&data_test[0],  vertices.size() * sizeof(glm::vec3) * 2);
+    //VertexBuffer nb(&normals[0],  normals.size() * sizeof(glm::vec3));
     //IndexBuffer ib(&indices[0], indices.size());
 
 
     VertexBufferLayout layout;
     layout.Push_FLOAT(3);
+    layout.Push_FLOAT(3);
     va.AddBuffer(vb, layout);
+    //va.AddBuffer(nb, layout);
+
+    /* Buffer structure: [position, normal]
+     * Both position and normal are sizeof(glm::vec3).
+     * This means position is offset by 0 and
+     * normal is offset by sizeof(glm::vec3).
+     */
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, NULL);
+    glEnableVertexAttribArray(0);
+
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (void*)(sizeof(glm::vec3)));
+    glEnableVertexAttribArray(1);
 
 
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
-    
 
     std::cout << GetCurrentWorkingDir()+"/cube.obj" << std::endl;;
     
     mShader.use();
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_CULL_FACE);
     //Plane plane;
     //GLuint LightID = glGetUniformLocation(mShader.ID, "LightPosition_worldspace");
 
@@ -105,7 +120,7 @@ int main()
         va.Bind();
         
         //glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() * 2);
         glBindVertexArray(0);
 
 
@@ -116,7 +131,7 @@ int main()
         //plane.Draw(mShader);
 
         glm::mat4 model2(1.0);
-        model2 = glm::translate(model2, glm::vec3(3.0,3.0,0.0));
+        model2 = glm::translate(model2, glm::vec3(5.0,0.0,0.0));
         mShader.setMat4("M", model2);
 
         //glm::vec3 lightPos = glm::vec3(4,4,4);
@@ -125,7 +140,7 @@ int main()
         va.Bind();
         
         //glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() * 2);
         glBindVertexArray(0);
         ////////////////////////////////
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

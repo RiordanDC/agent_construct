@@ -31,7 +31,6 @@ public:
 	VertexBufferLayout()
 		: m_Stride(0) {}
 
-
 	void Push_FLOAT(unsigned int count, bool normalized = false){
 
 		m_Elements.push_back({GL_FLOAT, count, GL_FALSE});

@@ -83,13 +83,13 @@ int WindowManager::initWindow(std::string name, int width, int height){
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_ALWAYS);
+    glDepthFunc(GL_ALWAYS);
 
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS); 
 
     // Cull triangles which normal is not towards the camera
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     return 0;
 }
 
