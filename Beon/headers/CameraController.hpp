@@ -22,11 +22,11 @@ void updateCamera(Shader &shader)
 {
     // pass projection matrix to shader (note that in this case it could change every frame)
     glm::mat4 ProjectionMatrix = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
-    shader.setMat4("P", ProjectionMatrix);
+    shader.setMat4("Projection", ProjectionMatrix);
 
     // camera/view transformation
     glm::mat4 ViewMatrix = camera.GetViewMatrix();
-    shader.setMat4("V", ViewMatrix);
+    shader.setMat4("View", ViewMatrix);
 
     //Model transform
     //glm::mat4 ModelMatrix = glm::mat4(1.0);

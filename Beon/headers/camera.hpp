@@ -40,6 +40,9 @@ public:
     float MouseSensitivity;
     float Zoom;
 
+    glm::mat4 ProjectionMatrix;
+    glm::mat4 ViewMatrix;
+
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
@@ -63,6 +66,31 @@ public:
     glm::mat4 GetViewMatrix()
     {
         return glm::lookAt(Position, Position + Front, Up);
+    }
+
+    void UpdateCamera(int SCR_WIDTH, int SCR_HEIGHT)
+    {
+        this->ProjectionMatrix = glm::perspective(glm::radians(this->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
+        //shader.setMat4("Projection", ProjectionMatrix);
+
+        this->ViewMatrix = this->GetViewMatrix();
+        //shader.setMat4("View", ViewMatrix);
+
+        //shader.setVec3("cameraPos", this->Position);
+    }
+
+    void UpdateCamera(Shader &shader, glm::mat4 ModelMatrix, int SCR_WIDTH, int SCR_HEIGHT)
+    {
+        this->ProjectionMatrix = glm::perspective(glm::radians(this->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
+        shader.setMat4("Projection", ProjectionMatrix);
+
+        this->ViewMatrix = this->GetViewMatrix();
+        shader.setMat4("View", ViewMatrix);
+
+        glm::mat4 MVP = this->ProjectionMatrix * this->ViewMatrix * ModelMatrix;
+        shader.setMat4("MVP", MVP);
+
+        shader.setVec3("cameraPos", this->Position);
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

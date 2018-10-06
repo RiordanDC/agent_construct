@@ -90,6 +90,9 @@ int WindowManager::initWindow(std::string name, int width, int height){
 
     // Cull triangles which normal is not towards the camera
     glEnable(GL_CULL_FACE);
+
+    //Enable SRGB
+    glEnable(GL_FRAMEBUFFER_SRGB); 
     return 0;
 }
 
