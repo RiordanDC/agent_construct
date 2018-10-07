@@ -16,7 +16,7 @@ WindowManager* Manager = WindowManager::getInstance();
 
 int main()
 {
-    if(Manager->initWindow("Beon", 800, 600) == -1){
+    if(Manager->initWindow("Beon", mWidth, mHeight) == -1){
         std::cout << "Window failed to initialize." << std::endl;
         return -1;
     };
@@ -27,7 +27,7 @@ int main()
     Render MainView(&camera, mWidth, mHeight);
 
 
-    Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
+    Shader mShader = Shader("shaders/CodeMaterialShader.vert", "shaders/CodeMaterialShader.frag");
     Shader mCubmap = Shader("shaders/CubeMap.vert", "shaders/CubeMap.frag" );
 
     Model cube(GetCurrentWorkingDir()+"/cube.obj", false);
@@ -35,13 +35,21 @@ int main()
     skybox.LoadSkyBox(GetCurrentWorkingDir()+"/skybox");
     mShader.use();
     mShader.setInt("skybox", 0);
+
+    mShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    mShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    mShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f); // specular lighting doesn't have full effect on this object's material
+    mShader.setFloat("material.shininess", 32.0f);
+
+    mShader.setBool("dirLight.On", true);
+
     mCubmap.use();
     mCubmap.setInt("skybox", 0);
 
     Object crysis(cube);
     crysis.AddShader("basic", mShader);
 
-    Object plane(GetCurrentWorkingDir()+"/cube.obj");
+    Object plane(cube);
     plane.AddShader("basic", mShader);
 
     int box_count = 100;
@@ -107,6 +115,52 @@ int main()
         
 
         MainView.Update();
+        MainView.UpdateShader(mShader);
+        
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+
+        mShader.setVec3("dirLight.direction", lightColor);
+        mShader.setVec3("dirLight.ambient", lightColor);
+        mShader.setVec3("dirLight.diffuse", lightColor);
+        mShader.setVec3("dirLight.specular", lightColor);
+        // point light 1
+        /*
+        mShader.setVec3("pointLights[0].position", camera.Position);
+        mShader.setVec3("pointLights[0].ambient", 1.f, 1.f, 1.f);
+        mShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        mShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        mShader.setFloat("pointLights[0].constant", 1.0f);
+        mShader.setFloat("pointLights[0].linear", 0.09);
+        mShader.setFloat("pointLights[0].quadratic", 0.032);
+        */
+        // spotLight
+        mShader.setBool("spotLight.On", true);
+        mShader.setVec3("spotLight.position", camera.Position);
+        mShader.setVec3("spotLight.direction", camera.Front);
+        mShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        mShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+        mShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        mShader.setFloat("spotLight.constant", 1.0f);
+        mShader.setFloat("spotLight.linear", 0.09);
+        mShader.setFloat("spotLight.quadratic", 0.032);
+        mShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        mShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));   
+        
+        /*
+        // light properties
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+        glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f); // decrease the influence
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+        mShader.setVec3("light.ambient", glm::vec3(1.0, 1.0,1.0));
+        mShader.setVec3("light.diffuse", glm::vec3(1.0, 1.0,1.0));
+        mShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        */
 
         crysis.Update(deltaTime);
         crysis.Render(MainView);
@@ -126,6 +180,7 @@ int main()
         //glm::vec3 lightPos = glm::vec3(4,4,4);
         //mShader.setVec3("LightPosition_worldspace", lightPos.x, lightPos.y, lightPos.z);
         //crysis.Draw(mShader);
+
         glDepthFunc(GL_LEQUAL);
         MainView.UpdateShader(mCubmap);
         //skybox.DrawSkyBox(mShader);
