@@ -4,6 +4,7 @@
 #include "CameraController.hpp"
 #include "Object.cpp"
 #include "Render.hpp"
+#include "Model.hpp"
 
 static bool running = true;
 
@@ -29,13 +30,24 @@ int main()
     Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
     //Shader mShader = Shader("StandardShading.vertexshader", "StandardShading.fragmentshader" );
 
-    Object crysis(GetCurrentWorkingDir()+"/cube.obj");
+    Model cube(GetCurrentWorkingDir()+"/cube.obj", false);
+
+    Object crysis(cube);
     crysis.AddShader("basic", mShader);
 
-    Object plane(GetCurrentWorkingDir()+"/cube.obj");
+    Object plane(cube);
     plane.AddShader("basic", mShader);
 
-    
+    int box_count = 100;
+
+    std::vector<Object*> objects;
+    for(int i = 0; i < box_count; i++){
+        Object* obj = new Object(cube);
+        obj->name = to_string(i);
+        obj->AddShader("basic", mShader);
+
+        objects.push_back(obj);
+    }
     mShader.use();
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //Plane plane;
@@ -54,15 +66,24 @@ int main()
  
     // The world.
     btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
-    dynamicsWorld->setGravity(btVector3(0,-9.81f,0));
+    dynamicsWorld->setGravity(btVector3(0,-5.1f,0));
 
-
+    crysis.mass = 10.0;
     crysis.InitPhysics(dynamicsWorld);
     crysis.SetPosition(glm::vec3(0.0,10.0,0.0));
+    crysis.ApplyForce(glm::vec3(0.0,30.0,0.0), glm::vec3(0.0,5.0,0.0));
     plane.mass = 0.0;
     plane.InitPhysics(dynamicsWorld);
     plane.SetPosition(glm::vec3(0.0, -10.0,0.0));
 
+
+    for(int i = 0; i < box_count; i++){
+        objects[i]->mass = 10.0;
+        objects[i]->InitPhysics(dynamicsWorld);
+        objects[i]->SetPosition(glm::vec3(0.0,(i*5)+10.0,0.0));
+        objects[i]->ApplyForce(glm::vec3(rand()%300, rand()%300, rand()%300), glm::vec3(rand()%20, rand()%20, rand()%20));
+        //printf("OBJECT %s SET!\n", objects[i]->name.c_str());
+    }
 
     // Game Loop //
     while (glfwWindowShouldClose(window) == false && running) {
@@ -80,11 +101,21 @@ int main()
         
 
         MainView.Update();
+
         crysis.Update(deltaTime);
         crysis.Render(MainView);
 
+        for(int i = 0; i < box_count; i++){
+            objects[i]->Update(deltaTime);
+            objects[i]->Render(MainView);
+        }
+
         plane.Update(deltaTime);
         plane.Render(MainView);
+
+        //printf("OBJECT CRYSI POS (%f, %f, %f)\n", crysis.Position.x, crysis.Position.y, crysis.Position.z);
+        //printf("OBJECT %s AT POS (%f, %f, %f)\n", objects[0]->name.c_str(), objects[0]->Position.x, objects[0]->Position.y, objects[0]->Position.z);
+
 
         //glm::vec3 lightPos = glm::vec3(4,4,4);
         //mShader.setVec3("LightPosition_worldspace", lightPos.x, lightPos.y, lightPos.z);

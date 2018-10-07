@@ -107,7 +107,7 @@ public:
             Position -= Right * velocity;
         if (direction == RIGHT)
             Position += Right * velocity;
-        printf("%f %f %f\n", Position.x, Position.y, Position.z);
+        //printf("%f %f %f\n", Position.x, Position.y, Position.z);
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
