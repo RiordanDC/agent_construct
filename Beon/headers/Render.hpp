@@ -1,5 +1,8 @@
+#ifndef RENDER_H
+#define RENDER_H
+#pragma once
 #include "camera.hpp"
-#include "shader.hpp"
+#include "Shader.hpp"
 
 class Render{
 public:
@@ -7,23 +10,24 @@ public:
 	int viewWidth;
 	int viewHeight;
 
+	
 	Render(Camera *camera, int viewWidth, int viewHeight){
 		this->camera = camera;
 		this->viewWidth = viewWidth;
 		this->viewHeight = viewHeight;
 	}
-
+	
 	void Update(){
 		this->camera->UpdateCamera(this->viewWidth, this->viewHeight);
 	}
 
+	/*
 	void Draw(Object &object){
 		this->UpdateShader(object.shader);
 		object.Render();
 	}
+	*/
 
-
-private:
 	void UpdateShader(Shader shader){
         shader.setMat4("Projection", this->camera->ProjectionMatrix);
 
@@ -41,3 +45,4 @@ private:
 	}
 
 };
+#endif

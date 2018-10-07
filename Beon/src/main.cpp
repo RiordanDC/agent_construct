@@ -1,10 +1,7 @@
 // Local Headers
 #include "beon.hpp"
-#include "shader.hpp"
+#include "Shader.hpp"
 #include "CameraController.hpp"
-#include "model.hpp"
-#include "Plane.hpp"
-#include "objloader.hpp"
 #include "Object.cpp"
 #include "Render.hpp"
 
@@ -32,16 +29,39 @@ int main()
     Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
     //Shader mShader = Shader("StandardShading.vertexshader", "StandardShading.fragmentshader" );
 
-    //Model crysis(GetCurrentWorkingDir()+"/nanosuit/nanosuit.obj", true);
-    Object crysis(GetCurrentWorkingDir()+"/nanosuit/nanosuit.obj");
+    Object crysis(GetCurrentWorkingDir()+"/cube.obj");
     crysis.AddShader("basic", mShader);
 
-    std::cout << GetCurrentWorkingDir()+"/cube.obj" << std::endl;;
+    Object plane(GetCurrentWorkingDir()+"/cube.obj");
+    plane.AddShader("basic", mShader);
+
     
     mShader.use();
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //Plane plane;
     //GLuint LightID = glGetUniformLocation(mShader.ID, "LightPosition_worldspace");
+
+
+   // Build the broadphase
+    btBroadphaseInterface* broadphase = new btDbvtBroadphase();
+ 
+    // Set up the collision configuration and dispatcher
+    btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+ 
+    // The actual physics solver
+    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+ 
+    // The world.
+    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+    dynamicsWorld->setGravity(btVector3(0,-9.81f,0));
+
+
+    crysis.InitPhysics(dynamicsWorld);
+    crysis.SetPosition(glm::vec3(0.0,10.0,0.0));
+    plane.mass = 0.0;
+    plane.InitPhysics(dynamicsWorld);
+    plane.SetPosition(glm::vec3(0.0, -10.0,0.0));
 
 
     // Game Loop //
@@ -51,11 +71,20 @@ int main()
 
         getDeltaTime();
         updateController(window, deltaTime);
+        dynamicsWorld->stepSimulation(1.0/60.0);
+
+
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        
+
         MainView.Update();
-        MainView.Draw(crysis);
+        crysis.Update(deltaTime);
+        crysis.Render(MainView);
+
+        plane.Update(deltaTime);
+        plane.Render(MainView);
 
         //glm::vec3 lightPos = glm::vec3(4,4,4);
         //mShader.setVec3("LightPosition_worldspace", lightPos.x, lightPos.y, lightPos.z);

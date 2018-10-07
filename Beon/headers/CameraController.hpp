@@ -8,7 +8,7 @@ unsigned int SCR_HEIGHT;
 float lastX;
 float lastY;
 bool firstMouse = true;
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(-0.178233, -0.471922, 28.753202));
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

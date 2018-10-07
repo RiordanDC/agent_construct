@@ -1,12 +1,16 @@
 //Renderable Object
-#include "shader.hpp"
+#ifndef RENDERABLE_H
+#define RENDERABLE_H
+#pragma once
 #include <map>
 #include <string>
+
+#include "Shader.hpp"
 
 class Renderable{
 public:
 	bool visable;
-	std::map<string, Shader*> shaders;
+	std::map<std::string, Shader*> shaders;
 	Shader shader;
 
 	Renderable(){
@@ -14,12 +18,13 @@ public:
 		this->shader = Shader();
 	}
 
-	void AddShader(string name, Shader shader){
+	void AddShader(std::string name, Shader shader){
 		this->shaders[name] = &shader;
 		this->shader = shader;
 	}
 
-	Shader* GetShader(string name){
+	Shader* GetShader(std::string name){
 		return this->shaders[name];
 	}
 };
+#endif
