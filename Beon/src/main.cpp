@@ -28,14 +28,20 @@ int main()
 
 
     Shader mShader = Shader("shaders/TransformVertexShader.vert", "shaders/TextureFragmentShader.frag");
-    //Shader mShader = Shader("StandardShading.vertexshader", "StandardShading.fragmentshader" );
+    Shader mCubmap = Shader("shaders/CubeMap.vert", "shaders/CubeMap.frag" );
 
     Model cube(GetCurrentWorkingDir()+"/cube.obj", false);
+    Model skybox;
+    skybox.LoadSkyBox(GetCurrentWorkingDir()+"/skybox");
+    mShader.use();
+    mShader.setInt("skybox", 0);
+    mCubmap.use();
+    mCubmap.setInt("skybox", 0);
 
     Object crysis(cube);
     crysis.AddShader("basic", mShader);
 
-    Object plane(cube);
+    Object plane(GetCurrentWorkingDir()+"/cube.obj");
     plane.AddShader("basic", mShader);
 
     int box_count = 100;
@@ -120,6 +126,10 @@ int main()
         //glm::vec3 lightPos = glm::vec3(4,4,4);
         //mShader.setVec3("LightPosition_worldspace", lightPos.x, lightPos.y, lightPos.z);
         //crysis.Draw(mShader);
+        glDepthFunc(GL_LEQUAL);
+        MainView.UpdateShader(mCubmap);
+        //skybox.DrawSkyBox(mShader);
+        skybox.DrawSkyBox(mCubmap);
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
@@ -135,9 +145,9 @@ int main()
     return 0;
 }
 
-void render(const VertexBuffer& vb, const IndexBuffer& ib, Shader& shader){
-
-}
+//void render(const VertexBuffer& vb, const IndexBuffer& ib, Shader& shader){
+//
+//}
 
 void cleanup()
 {

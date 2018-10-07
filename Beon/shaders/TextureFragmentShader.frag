@@ -7,6 +7,7 @@ in vec3 Normal;
 in vec3 viewPos;
 
 uniform sampler2D texture_diffuse1;
+uniform samplerCube skybox;
 
 vec3 lightPos = vec3(2.0, 5.0, 10.0);
 vec3 lightColor = vec3(1.0, 1.0, 1.0);
@@ -33,4 +34,8 @@ void main()
         
     vec3 result = (ambient + diffuse + specular) * objectColor;
     FragColor = vec4(result, 1.0);
+
+    //vec3 I = normalize(FragPos - viewPos);
+    //vec3 R = reflect(I, normalize(Normal));
+    //FragColor = vec4(texture(skybox, R).rgb, 1.0);
 }

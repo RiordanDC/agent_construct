@@ -24,6 +24,11 @@
 #include <vector>
 using namespace std;
 
+struct SkyBox{
+    unsigned int skyboxVAO;
+    unsigned int skyboxVBO;
+    unsigned int cubemapTexture;
+};
 
 class Model 
 {
@@ -33,17 +38,23 @@ public:
     vector<Mesh> meshes;
     string directory;
     bool gammaCorrection;
+    SkyBox skybox;
 
 
     /*  Functions   */
     Model();
+
     // constructor, expects a filepath to a 3D model.
     Model(string const &path, bool gamma = false);
 
     Model* Clone() const { return new Model(*this); }
 
+    void LoadSkyBox(string const &path);
+
     // draws the model, and thus all its meshes
     void Draw(Shader shader);
+
+    void DrawSkyBox(Shader shader);
     
 private:
     /*  Functions   */

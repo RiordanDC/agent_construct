@@ -29,6 +29,7 @@ public:
 	*/
 
 	void UpdateShader(Shader shader){
+		shader.use();
         shader.setMat4("Projection", this->camera->ProjectionMatrix);
 
         shader.setMat4("View", this->camera->ViewMatrix);
@@ -37,7 +38,7 @@ public:
 	}
 
 	void UpdateShader(Shader shader, glm::mat4 &ModelMatrix){
-
+		shader.use();
         glm::mat4 MVP = this->camera->ProjectionMatrix * this->camera->ViewMatrix * ModelMatrix;
         shader.setMat4("MVP", MVP);
 
